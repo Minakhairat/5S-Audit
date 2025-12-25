@@ -1,0 +1,4049 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام مراجعة وتقييم 5S</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ========== CSS RESET & BASE ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #e53935;
+            --primary-dark: #c62828;
+            --primary-light: #ff6b6b;
+            --secondary-color: #455a64;
+            --light-gray: #f5f5f5;
+            --medium-gray: #bdbdbd;
+            --dark-gray: #424242;
+            --white: #ffffff;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --info: #2196f3;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: var(--dark-gray);
+            line-height: 1.6;
+            transition: var(--transition);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body[dir="rtl"] {
+            text-align: right;
+        }
+
+        body[dir="ltr"] {
+            text-align: left;
+        }
+
+        /* ========== LAYOUT ========== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* ========== NAVIGATION BAR ========== */
+        .navbar {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn, .lang-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border: none;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover, .lang-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* ========== STEPS ========== */
+        .step {
+            display: none;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.5s ease;
+            position: relative;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .step-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--light-gray);
+            position: relative;
+        }
+
+        .step-header h2 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-header p {
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+
+        /* ========== LEVEL CARDS ========== */
+        .level-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .level-card {
+            background-color: var(--white);
+            border: 2px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .level-card.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(229, 57, 53, 0.05);
+            box-shadow: 0 5px 15px rgba(229, 57, 53, 0.2);
+        }
+
+        .level-icon {
+            width: 70px;
+            height: 70px;
+            background-color: var(--light-gray);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 2rem;
+            color: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .level-card:hover .level-icon {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .level-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .level-card p {
+            color: var(--secondary-color);
+            font-size: 0.95rem;
+        }
+
+        /* ========== FORMS ========== */
+        .form-section {
+            background-color: var(--light-gray);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: var(--white);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.2);
+        }
+
+        small {
+            display: block;
+            margin-top: 5px;
+            color: var(--medium-gray);
+            font-size: 0.85rem;
+        }
+
+        /* ========== UNIT FIELDS ========== */
+        .unit-field {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            border: 1px solid var(--medium-gray);
+            transition: var(--transition);
+        }
+
+        .unit-field:hover {
+            border-color: var(--primary-color);
+        }
+
+        .unit-field h4 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        /* ========== EVALUATION CONTROLS ========== */
+        .evaluation-controls {
+            background-color: var(--light-gray);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .unit-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .score-info {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .score-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--white);
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .score-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .score-label {
+            color: var(--dark-gray);
+        }
+
+        .score-value {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* ========== 5S SECTIONS ========== */
+        .s5-section {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid var(--light-gray);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .s5-section:hover {
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .s5-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-gray);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .s5-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--primary-color);
+            font-size: 1.4rem;
+        }
+
+        .s5-score {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            background-color: var(--light-gray);
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .s5-questions {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .question-item {
+            padding: 20px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            background-color: #fafafa;
+        }
+
+        .question-item:hover {
+            border-color: var(--primary-color);
+            background-color: var(--white);
+        }
+
+        .question-text {
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .answer-options {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .answer-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .answer-option input[type="radio"] {
+            width: auto;
+            margin: 0;
+            transform: scale(1.2);
+        }
+
+        .answer-label {
+            padding: 10px 20px;
+            border: 2px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .answer-label.A {
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .answer-label.B {
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .answer-label.C {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .answer-option input:checked + .answer-label {
+            background-color: rgba(229, 57, 53, 0.1);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: scale(1.05);
+        }
+
+        /* ========== COMMENT AND IMAGE ========== */
+        .comment-section, .image-section {
+            margin-top: 20px;
+        }
+
+        .comment-section textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .image-preview {
+            margin-top: 15px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .preview-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+            border: 3px solid var(--medium-gray);
+            transition: var(--transition);
+        }
+
+        .preview-image:hover {
+            transform: scale(1.05);
+            border-color: var(--primary-color);
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* ========== BUTTONS ========== */
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white);
+            box-shadow: 0 4px 6px rgba(229, 57, 53, 0.2);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(229, 57, 53, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: var(--white);
+            box-shadow: 0 4px 6px rgba(69, 90, 100, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--dark-gray);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(69, 90, 100, 0.3);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(229, 57, 53, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: var(--white);
+            box-shadow: 0 4px 6px rgba(76, 175, 80, 0.2);
+        }
+
+        .btn-success:hover {
+            background-color: #388e3c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+
+        .step-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid var(--light-gray);
+        }
+
+        /* ========== SAVE BUTTON ========== */
+        #save-audit-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(33, 150, 243, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0); }
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(0, 0); opacity: 1; }
+            20% { transform: scale(25, 25); opacity: 1; }
+            100% { transform: scale(40, 40); opacity: 0; }
+        }
+
+        /* ========== RESULTS ========== */
+        .results-summary {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            animation: slideInUp 0.5s ease;
+        }
+
+        @media (max-width: 768px) {
+            .results-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .summary-card {
+            text-align: center;
+            padding: 25px;
+            border: 3px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--light-gray) 0%, #ffffff 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            border: 8px solid var(--primary-color);
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .score-circle::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            border-radius: 50%;
+            border: 2px solid rgba(229, 57, 53, 0.1);
+        }
+
+        .score-circle span {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            line-height: 1;
+        }
+
+        .score-circle small {
+            color: var(--secondary-color);
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        .score-description {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-top: 15px;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            display: inline-block;
+        }
+
+        .status-excellent {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--success);
+        }
+
+        .status-good {
+            background-color: rgba(255, 152, 0, 0.2);
+            color: var(--warning);
+        }
+
+        .status-needs-improvement {
+            background-color: rgba(33, 150, 243, 0.2);
+            color: var(--info);
+        }
+
+        .status-poor {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: var(--danger);
+        }
+
+        .summary-details h4 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .detail-item {
+            padding: 15px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .detail-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--dark-gray);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* ========== CHARTS ========== */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            animation: slideInUp 0.7s ease;
+        }
+
+        .chart-card h4 {
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-size: 1.4rem;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-gray);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ========== TABLE ========== */
+        .detailed-results {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+            animation: slideInUp 0.9s ease;
+        }
+
+        .detailed-results h4 {
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-size: 1.4rem;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-gray);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--light-gray);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th, td {
+            padding: 18px;
+            text-align: center;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: var(--white);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        tr {
+            transition: var(--transition);
+        }
+
+        tr:hover {
+            background-color: rgba(229, 57, 53, 0.05);
+        }
+
+        .status-badge {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-block;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        /* ========== RECOMMENDATIONS ========== */
+        .recommendations {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            animation: slideInUp 1.1s ease;
+            margin-bottom: 40px;
+        }
+
+        .recommendations h4 {
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-size: 1.4rem;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-gray);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recommendation-item {
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-color);
+            background-color: var(--light-gray);
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            transition: var(--transition);
+        }
+
+        .recommendation-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .recommendation-item strong {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .recommendation-item ul {
+            margin-right: 20px;
+            margin-top: 10px;
+        }
+
+        .recommendation-item li {
+            margin-bottom: 8px;
+            padding-right: 10px;
+            position: relative;
+        }
+
+        .recommendation-item li:before {
+            content: "•";
+            color: var(--primary-color);
+            font-weight: bold;
+            position: absolute;
+            right: -15px;
+        }
+
+        /* ========== SAVED AUDITS SIDEBAR ========== */
+        .saved-audits-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 380px;
+            height: 100vh;
+            background-color: var(--white);
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
+            transition: var(--transition);
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .saved-audits-sidebar.open {
+            right: 0;
+        }
+
+        .sidebar-header {
+            padding: 25px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.3rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: var(--light-gray);
+        }
+
+        .sidebar-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .saved-audit-item {
+            padding: 20px;
+            margin-bottom: 15px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .saved-audit-item:hover {
+            border-color: var(--primary-color);
+            transform: translateX(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .saved-audit-item.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(229, 57, 53, 0.05);
+        }
+
+        .saved-audit-item h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .saved-audit-item p {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .saved-audit-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 2px solid var(--light-gray);
+            background-color: var(--white);
+        }
+
+        #toggle-saved-audits {
+            width: 100%;
+        }
+
+        /* ========== MODAL ========== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1002;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideInUp 0.4s ease;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            padding: 25px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-footer {
+            padding: 25px;
+            border-top: 2px solid var(--light-gray);
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            background-color: #fafafa;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+
+        /* ========== PRINT PREVIEW ========== */
+        #print-preview {
+            background-color: var(--white);
+            padding: 40px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .print-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 5px solid var(--primary-color);
+        }
+
+        .print-logo {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .print-title {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .print-subtitle {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .print-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+            background-color: #f9f9f9;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            border: 2px solid var(--light-gray);
+        }
+
+        .print-section {
+            margin-bottom: 40px;
+            page-break-inside: avoid;
+        }
+
+        .print-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--light-gray);
+            font-size: 1.8rem;
+        }
+
+        .print-score {
+            text-align: center;
+            margin: 30px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
+            border-radius: var(--border-radius);
+            border: 3px solid var(--light-gray);
+        }
+
+        .print-score-value {
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 20px 0;
+        }
+
+        .print-score-percentage {
+            font-size: 1.8rem;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+
+        .print-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border: 2px solid var(--light-gray);
+        }
+
+        .print-table th, .print-table td {
+            padding: 18px;
+            border: 1px solid var(--medium-gray);
+            text-align: center;
+        }
+
+        .print-table th {
+            background-color: var(--primary-color);
+            color: var(--white);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .print-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .print-recommendations-section {
+            margin-top: 40px;
+            padding: 30px;
+            background-color: #f9f9f9;
+            border-radius: var(--border-radius);
+            border: 2px solid var(--light-gray);
+        }
+
+        .print-recommendation-item {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .print-recommendation-item strong {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .print-recommendation-item ul {
+            margin-right: 25px;
+        }
+
+        .print-recommendation-item li {
+            margin-bottom: 12px;
+            padding-right: 15px;
+            font-size: 1.1rem;
+        }
+
+        .print-footer {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 3px solid #ccc;
+            text-align: center;
+            font-size: 1rem;
+            color: #666;
+        }
+
+        /* ========== DATA MANAGEMENT ========== */
+        .data-options {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .data-option {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            border: 2px solid transparent;
+        }
+
+        .data-option.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(229, 57, 53, 0.2);
+        }
+
+        .data-option i {
+            font-size: 2rem;
+        }
+
+        .data-section {
+            display: none;
+        }
+
+        .data-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .data-actions {
+            display: flex;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .data-preview textarea {
+            width: 100%;
+            min-height: 250px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 2px solid var(--light-gray);
+            border-radius: var(--border-radius);
+        }
+
+        .file-upload {
+            margin: 30px 0;
+        }
+
+        .file-label {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(229, 57, 53, 0.2);
+        }
+
+        .file-label:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(229, 57, 53, 0.3);
+        }
+
+        #file-name {
+            display: block;
+            margin-top: 15px;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .import-warning {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(255, 152, 0, 0.1);
+            border: 2px solid var(--warning);
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        /* ========== ANIMATIONS ========== */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ========== RESPONSIVE DESIGN ========== */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .nav-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .step {
+                padding: 20px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .evaluation-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .saved-audits-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            
+            #save-audit-btn {
+                bottom: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .s5-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .answer-options {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .level-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .score-info {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .score-box {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .data-options {
+                flex-direction: column;
+            }
+        }
+
+        /* ========== PRINT STYLES ========== */
+        @media print {
+            .navbar, .step-actions, .saved-audits-sidebar, .modal, #save-audit-btn {
+                display: none !important;
+            }
+            
+            body {
+                background-color: white !important;
+                font-size: 12pt !important;
+            }
+            
+            .container {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+            
+            .step {
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+            }
+            
+            .step-header {
+                border: none !important;
+            }
+            
+            .print-recommendations-section {
+                display: block !important;
+            }
+            
+            #print-preview {
+                padding: 0 !important;
+            }
+            
+            a {
+                text-decoration: none !important;
+                color: black !important;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* ========== UTILITY CLASSES ========== */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        .p-20 {
+            padding: 20px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: var(--medium-gray);
+            font-style: italic;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            border: 2px dashed var(--medium-gray);
+        }
+
+        /* ========== CONFIRMATION MODAL ========== */
+        .confirmation-modal {
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .confirmation-modal .modal-body {
+            padding: 40px;
+        }
+
+        .confirmation-icon {
+            font-size: 4rem;
+            color: var(--warning);
+            margin-bottom: 20px;
+        }
+
+        .confirmation-message {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        /* ========== LOADING INDICATOR ========== */
+        .loading {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--light-gray);
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-industry"></i>
+                <span id="app-title">نظام مراجعة وتقييم 5S</span>
+            </div>
+            <div class="nav-links">
+                <button id="lang-toggle" class="lang-btn">
+                    <i class="fas fa-language"></i>
+                    <span>English</span>
+                </button>
+                <button id="toggle-saved-audits" class="nav-btn">
+                    <i class="fas fa-history"></i>
+                    <span id="saved-audits-text">التقييمات السابقة</span>
+                </button>
+                <button id="export-btn" class="nav-btn">
+                    <i class="fas fa-download"></i>
+                    <span id="export-text">تصدير</span>
+                </button>
+                <button id="import-btn" class="nav-btn">
+                    <i class="fas fa-upload"></i>
+                    <span id="import-text">استيراد</span>
+                </button>
+                <button id="print-btn" class="nav-btn">
+                    <i class="fas fa-print"></i>
+                    <span id="print-text">طباعة</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- زر الحفظ العائم -->
+    <button id="save-audit-btn" class="btn btn-success hidden">
+        <i class="fas fa-save"></i>
+        <span id="save-text">حفظ التقييم</span>
+    </button>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="container">
+        <!-- الخطوة 1: اختيار مستوى التقييم -->
+        <section id="step1" class="step active">
+            <div class="step-header">
+                <h2><i class="fas fa-cogs"></i> <span id="step1-title">الخطوة 1: تحديد مستوى التقييم</span></h2>
+                <p id="step1-desc">اختر مستوى التقييم المناسب للبدء في عملية المراجعة</p>
+            </div>
+            
+            <div class="level-cards">
+                <div class="level-card" data-level="factory">
+                    <div class="level-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3 id="level-factory">المصنع ككل</h3>
+                    <p id="level-factory-desc">تقييم شامل للمصنع بأكمله</p>
+                </div>
+                
+                <div class="level-card" data-level="department">
+                    <div class="level-icon">
+                        <i class="fas fa-sitemap"></i>
+                    </div>
+                    <h3 id="level-department">الأقسام</h3>
+                    <p id="level-department-desc">تقييم كل قسم على حدة</p>
+                </div>
+                
+                <div class="level-card" data-level="production-line">
+                    <div class="level-icon">
+                        <i class="fas fa-conveyor-belt"></i>
+                    </div>
+                    <h3 id="level-line">خط الإنتاج</h3>
+                    <p id="level-line-desc">تقييم كل خط إنتاج بشكل منفصل</p>
+                </div>
+                
+                <div class="level-card" data-level="stage">
+                    <div class="level-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <h3 id="level-stage">المراحل</h3>
+                    <p id="level-stage-desc">تقييم كل مرحلة داخل الخط</p>
+                </div>
+            </div>
+            
+            <div class="step-actions">
+                <button id="next-step1" class="btn btn-primary">
+                    <span id="next-step1-text">التالي</span> <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- الخطوة 2: إدخال المعلومات الأساسية -->
+        <section id="step2" class="step">
+            <div class="step-header">
+                <h2><i class="fas fa-info-circle"></i> <span id="step2-title">الخطوة 2: المعلومات الأساسية</span></h2>
+                <p id="step2-desc">أدخل معلومات المراجعة الأساسية</p>
+            </div>
+            
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="audit-name" id="audit-name-label">اسم التقييم:</label>
+                    <input type="text" id="audit-name" placeholder="مثال: تقييم مصنع الإنتاج الرئيسي - مارس 2024">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="area-name" id="area-name-label">اسم المنطقة:</label>
+                        <input type="text" id="area-name" placeholder="اسم المصنع / القسم / الخط">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="audit-date" id="audit-date-label">تاريخ المراجعة:</label>
+                        <input type="date" id="audit-date">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reviewer-name" id="reviewer-name-label">اسم المراجع:</label>
+                        <input type="text" id="reviewer-name" placeholder="اسم المراجع (اختياري)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="level-count" id="level-count-label">عدد الوحدات:</label>
+                        <input type="number" id="level-count" min="1" max="20" value="1">
+                        <small id="level-count-help">عدد الوحدات الفرعية (أقسام، خطوط، أو مراحل)</small>
+                    </div>
+                </div>
+                
+                <div id="units-container">
+                    <!-- ستتم إضافة حقول الوحدات ديناميكياً هنا -->
+                </div>
+            </div>
+            
+            <div class="step-actions">
+                <button id="prev-step2" class="btn btn-secondary">
+                    <i class="fas fa-arrow-right"></i> <span id="prev-step2-text">السابق</span>
+                </button>
+                <button id="next-step2" class="btn btn-primary">
+                    <span id="next-step2-text">التالي</span> <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- الخطوة 3: تقييم 5S -->
+        <section id="step3" class="step">
+            <div class="step-header">
+                <h2><i class="fas fa-clipboard-check"></i> <span id="step3-title">الخطوة 3: تقييم 5S</span></h2>
+                <p id="step3-desc">قم بتقييم كل عنصر من عناصر 5S حسب الأداء الملاحظ</p>
+            </div>
+            
+            <div class="evaluation-controls">
+                <div class="unit-selector">
+                    <label for="current-unit" id="current-unit-label">الوحدة الحالية:</label>
+                    <select id="current-unit">
+                        <!-- سيتم ملؤها ديناميكياً -->
+                    </select>
+                </div>
+                
+                <div class="score-info">
+                    <div class="score-box">
+                        <span class="score-label" id="score-a">أ (ممتاز):</span>
+                        <span class="score-value">3 نقاط</span>
+                    </div>
+                    <div class="score-box">
+                        <span class="score-label" id="score-b">ب (جيد):</span>
+                        <span class="score-value">1 نقطة</span>
+                    </div>
+                    <div class="score-box">
+                        <span class="score-label" id="score-c">ج (ضعيف):</span>
+                        <span class="score-value">0 نقطة</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="5s-sections">
+                <!-- ستتم إضافة أقسام 5S ديناميكياً هنا -->
+            </div>
+            
+            <div class="step-actions">
+                <button id="prev-step3" class="btn btn-secondary">
+                    <i class="fas fa-arrow-right"></i> <span id="prev-step3-text">السابق</span>
+                </button>
+                <button id="next-step3" class="btn btn-primary">
+                    <span id="next-step3-text">عرض النتائج</span> <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- الخطوة 4: النتائج والتقارير -->
+        <section id="step4" class="step">
+            <div class="step-header">
+                <h2><i class="fas fa-chart-bar"></i> <span id="step4-title">الخطوة 4: النتائج والتقارير</span></h2>
+                <p id="step4-desc">نتائج التقييم والتحليل الإحصائي</p>
+            </div>
+            
+            <div class="results-container">
+                <!-- الملخص العام -->
+                <div class="results-summary">
+                    <div class="summary-card">
+                        <h3 id="overall-score">التقييم العام</h3>
+                        <div class="score-circle">
+                            <span id="total-score">0</span>
+                            <small id="out-of">من 69</small>
+                        </div>
+                        <div class="score-description">
+                            <span id="score-description-text">جيد</span>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-details">
+                        <h4 id="details-title">تفاصيل النتائج</h4>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label" id="detail-area">المنطقة:</span>
+                                <span class="detail-value" id="detail-area-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label" id="detail-date">التاريخ:</span>
+                                <span class="detail-value" id="detail-date-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label" id="detail-reviewer">المراجع:</span>
+                                <span class="detail-value" id="detail-reviewer-value">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label" id="detail-level">المستوى:</span>
+                                <span class="detail-value" id="detail-level-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- الرسوم البيانية -->
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h4 id="radar-chart-title">رادار 5S</h4>
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h4 id="bar-chart-title">مقارنة النتائج</h4>
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- جدول النتائج التفصيلي -->
+                <div class="detailed-results">
+                    <h4 id="detailed-results-title">النتائج التفصيلية</h4>
+                    <div class="table-container">
+                        <table id="results-table">
+                            <thead>
+                                <tr>
+                                    <th id="th-5s">5S</th>
+                                    <th id="th-score">الدرجة</th>
+                                    <th id="th-percentage">النسبة</th>
+                                    <th id="th-status">الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-table-body">
+                                <!-- سيتم ملؤها ديناميكياً -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- الملاحظات والتوصيات -->
+                <div class="recommendations no-print">
+                    <h4 id="recommendations-title">التوصيات والملاحظات</h4>
+                    <div id="recommendations-content">
+                        <!-- سيتم ملؤها ديناميكياً -->
+                    </div>
+                </div>
+
+                <!-- قسم التوصيات للطباعة -->
+                <div id="print-recommendations-section" class="print-recommendations-section hidden">
+                    <!-- سيتم ملؤها ديناميكياً عند الطباعة -->
+                </div>
+            </div>
+            
+            <div class="step-actions">
+                <button id="prev-step4" class="btn btn-secondary">
+                    <i class="fas fa-arrow-right"></i> <span id="prev-step4-text">السابق</span>
+                </button>
+                <button id="new-audit" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> <span id="new-audit-text">تقييم جديد</span>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- القائمة الجانبية للتقيمات السابقة -->
+    <aside class="saved-audits-sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-history"></i> <span id="saved-audits-text-sidebar">التقييمات المحفوظة</span></h3>
+            <button id="close-sidebar" class="close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="sidebar-content">
+            <div id="saved-list">
+                <!-- ستتم إضافة التقييمات المحفوظة هنا -->
+            </div>
+        </div>
+        
+        <div class="sidebar-footer">
+            <button id="manage-data-btn" class="btn btn-outline" style="width: 100%; margin-bottom: 10px;">
+                <i class="fas fa-database"></i>
+                <span id="manage-data-text">إدارة البيانات</span>
+            </button>
+            <button id="clear-data-btn" class="btn btn-secondary" style="width: 100%;">
+                <i class="fas fa-trash"></i>
+                <span id="clear-data-text">حذف التقييمات</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- نافذة الطباعة -->
+    <div id="print-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="print-modal-title">طباعة التقرير</h3>
+                <button id="close-print-modal" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="print-preview">
+                    <!-- معاينة الطباعة ستظهر هنا -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="do-print" class="btn btn-primary">
+                    <i class="fas fa-print"></i> <span id="print-now-text">طباعة الآن</span>
+                </button>
+                <button id="cancel-print" class="btn btn-secondary">
+                    <span id="cancel-print-text">إلغاء</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة الاستيراد/التصدير -->
+    <div id="data-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="data-modal-title">إدارة البيانات</h3>
+                <button id="close-data-modal" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="data-options">
+                    <div class="data-option active" id="export-option">
+                        <i class="fas fa-download"></i>
+                        <span id="export-data-text">تصدير البيانات</span>
+                    </div>
+                    <div class="data-option" id="import-option">
+                        <i class="fas fa-upload"></i>
+                        <span id="import-data-text">استيراد البيانات</span>
+                    </div>
+                </div>
+                
+                <div id="export-section" class="data-section active">
+                    <h4 id="export-instructions">تصدير جميع التقييمات المحفوظة</h4>
+                    <p id="export-description">سيتم تصدير جميع التقييمات في ملف JSON واحد يمكنك استيراده لاحقاً.</p>
+                    <div class="data-actions">
+                        <button id="copy-json" class="btn btn-secondary">
+                            <i class="fas fa-copy"></i> <span id="copy-json-text">نسخ JSON</span>
+                        </button>
+                        <button id="download-json" class="btn btn-primary">
+                            <i class="fas fa-file-download"></i> <span id="download-json-text">تحميل ملف JSON</span>
+                        </button>
+                    </div>
+                    <div class="data-preview">
+                        <textarea id="json-data" readonly rows="10" placeholder="بيانات JSON ستظهر هنا..."></textarea>
+                    </div>
+                </div>
+                
+                <div id="import-section" class="data-section">
+                    <h4 id="import-instructions">استيراد بيانات التقييمات</h4>
+                    <p id="import-description">اختر ملف JSON الذي يحتوي على بيانات التقييمات المحفوظة مسبقاً.</p>
+                    <div class="file-upload">
+                        <input type="file" id="json-file" accept=".json">
+                        <label for="json-file" class="file-label">
+                            <i class="fas fa-file-upload"></i>
+                            <span id="choose-file-text">اختر ملف JSON</span>
+                        </label>
+                        <span id="file-name">لم يتم اختيار ملف</span>
+                    </div>
+                    <div class="data-actions">
+                        <button id="import-json" class="btn btn-primary" disabled>
+                            <i class="fas fa-upload"></i> <span id="import-json-text">استيراد البيانات</span>
+                        </button>
+                    </div>
+                    <div class="import-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span id="import-warning-text">تحذير: استيراد البيانات سيستبدل جميع البيانات الحالية.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تأكيد الحذف -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content confirmation-modal">
+            <div class="modal-header">
+                <h3 id="confirm-modal-title">تأكيد الحذف</h3>
+                <button id="close-confirm-modal" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirmation-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <p class="confirmation-message" id="confirm-message">هل أنت متأكد من رغبتك في حذف جميع التقييمات المحفوظة؟ هذا الإجراء لا يمكن التراجع عنه.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirm-delete" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> <span id="confirm-delete-text">نعم، احذف الكل</span>
+                </button>
+                <button id="cancel-delete" class="btn btn-secondary">
+                    <span id="cancel-delete-text">إلغاء</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- عنصر لإخفاء الملفات المرفوعة -->
+    <input type="file" id="image-upload" accept="image/*" style="display: none;">
+
+    <script>
+        // ==================== 5S AUDIT TOOL - ملف JavaScript كامل ====================
+
+        // ==================== متغيرات عامة ====================
+        let currentStep = 1;
+        let selectedLevel = '';
+        let auditData = {
+            id: null,
+            name: '',
+            level: '',
+            area: '',
+            date: '',
+            reviewer: '',
+            units: [],
+            evaluations: [],
+            results: {},
+            createdAt: null,
+            isSaved: false
+        };
+
+        let savedAudits = [];
+        let currentUnitIndex = 0;
+        let currentLanguage = 'ar';
+        let radarChart, barChart;
+        let isDataChanged = false;
+
+        // ==================== ترجمة التطبيق ====================
+        const translations = {
+            ar: {
+                // عناصر الواجهة
+                appTitle: 'نظام مراجعة وتقييم 5S',
+                printText: 'طباعة',
+                exportText: 'تصدير',
+                importText: 'استيراد',
+                savedAuditsText: 'التقييمات السابقة',
+                saveText: 'حفظ التقييم',
+                savedAuditsTextSidebar: 'التقييمات المحفوظة',
+                manageDataText: 'إدارة البيانات',
+                clearDataText: 'حذف التقييمات',
+                
+                // الخطوة 1
+                step1Title: 'الخطوة 1: تحديد مستوى التقييم',
+                step1Desc: 'اختر مستوى التقييم المناسب للبدء في عملية المراجعة',
+                levelFactory: 'المصنع ككل',
+                levelFactoryDesc: 'تقييم شامل للمصنع بأكمله',
+                levelDepartment: 'الأقسام',
+                levelDepartmentDesc: 'تقييم كل قسم على حدة',
+                levelLine: 'خط الإنتاج',
+                levelLineDesc: 'تقييم كل خط إنتاج بشكل منفصل',
+                levelStage: 'المراحل',
+                levelStageDesc: 'تقييم كل مرحلة داخل الخط',
+                nextStep1Text: 'التالي',
+                
+                // الخطوة 2
+                step2Title: 'الخطوة 2: المعلومات الأساسية',
+                step2Desc: 'أدخل معلومات المراجعة الأساسية',
+                auditNameLabel: 'اسم التقييم:',
+                auditNamePlaceholder: 'مثال: تقييم مصنع الإنتاج الرئيسي - مارس 2024',
+                areaNameLabel: 'اسم المنطقة:',
+                areaNamePlaceholder: 'اسم المصنع / القسم / الخط',
+                auditDateLabel: 'تاريخ المراجعة:',
+                reviewerNameLabel: 'اسم المراجع:',
+                reviewerNamePlaceholder: 'اسم المراجع (اختياري)',
+                levelCountLabel: 'عدد الوحدات:',
+                levelCountHelp: 'عدد الوحدات الفرعية (أقسام، خطوط، أو مراحل)',
+                unitNameLabel: 'اسم الوحدة',
+                prevStep2Text: 'السابق',
+                nextStep2Text: 'التالي',
+                
+                // الخطوة 3
+                step3Title: 'الخطوة 3: تقييم 5S',
+                step3Desc: 'قم بتقييم كل عنصر من عناصر 5S حسب الأداء الملاحظ',
+                currentUnitLabel: 'الوحدة الحالية:',
+                scoreA: 'أ (ممتاز):',
+                scoreB: 'ب (جيد):',
+                scoreC: 'ج (ضعيف):',
+                prevStep3Text: 'السابق',
+                nextStep3Text: 'عرض النتائج',
+                
+                // الخطوة 4
+                step4Title: 'الخطوة 4: النتائج والتقارير',
+                step4Desc: 'نتائج التقييم والتحليل الإحصائي',
+                overallScore: 'التقييم العام',
+                outOf: 'من 69',
+                detailsTitle: 'تفاصيل النتائج',
+                detailArea: 'المنطقة:',
+                detailDate: 'التاريخ:',
+                detailReviewer: 'المراجع:',
+                detailLevel: 'المستوى:',
+                radarChartTitle: 'رادار 5S',
+                barChartTitle: 'مقارنة النتائج',
+                detailedResultsTitle: 'النتائج التفصيلية',
+                th5s: '5S',
+                thScore: 'الدرجة',
+                thPercentage: 'النسبة',
+                thStatus: 'الحالة',
+                recommendationsTitle: 'التوصيات والملاحظات',
+                prevStep4Text: 'السابق',
+                newAuditText: 'تقييم جديد',
+                
+                // أسئلة 5S
+                sortTitle: '1. الفرز (Sort)',
+                sortDesc: 'التمييز بين ما هو مطلوب وغير مطلوب',
+                sortQuestions: [
+                    'هل جميع الأشياء غير اللازمة تم إزالتها؟',
+                    'هل جميع الأشياء المتبقية تم ترتيبها؟',
+                    'هل جميع الممرات ومناطق العمل تم تحديدها وإيضاحها؟',
+                    'هل جميع الأشياء غير اللازمة تم تخزينها في مكان مناسب؟',
+                    'هل هناك خطة للتخلص من الأشياء غير اللازمة؟'
+                ],
+                
+                storageTitle: '2. التنظيم (Storage)',
+                storageDesc: 'مكان لكل شيء وكل شيء في مكانه',
+                storageQuestions: [
+                    'هل هناك تحديد وتخطيط لكل شيء؟',
+                    'هل كل شيء موجود في مكانه المحدد؟',
+                    'هل يوجد سهولة في التعرف على التنميط والحدود؟',
+                    'هل من السهل أن ترى ما تريد وأين تجده؟',
+                    'هل الأشياء توضع في مكانها بعد الاستخدام؟'
+                ],
+                
+                shineTitle: '3. التنظيف (Shine)',
+                shineDesc: 'التنظيف والبحث عن طرق للحفاظ على النظافة',
+                shineQuestions: [
+                    'هل أماكن العمل نظيفة؟',
+                    'هل الماكينات ومعدات العمل نظيفة؟',
+                    'هل أدوات النظافة سهلة الوصول إليها؟',
+                    'هل جدول وخطوات النظافة يمكن رؤيتها؟',
+                    'هل خطوط التحديد واضحة ومتصلة ونظيفة؟',
+                    'هل التنظيف يتم كنوع من عمليات الفحص؟'
+                ],
+                
+                standardizeTitle: '4. التقييس (Standardise)',
+                standardizeDesc: 'جعل المعايير واضحة ومحافظة عليها',
+                standardizeQuestions: [
+                    'هل جميع البيانات الضرورية مرئية؟',
+                    'هل جميع المواصفات القياسية معروفة ومرئية؟',
+                    'هل يوجد قائمة فحص بالمكان؟',
+                    'هل يوجد لوحة توضح 5S بالمكان؟'
+                ],
+                
+                sustainTitle: '5. الانضباط (Sustain)',
+                sustainDesc: 'الالتزام بالقواعد والمتابعة',
+                sustainQuestions: [
+                    'هل كل فرد يرى المواصفات القياسية؟',
+                    'هل تستخدم الكروت الحمراء للتصنيف؟',
+                    'هل الأشياء الشخصية موضوعة في الأماكن الصحيحة؟'
+                ],
+                
+                // أزرار وأدوات
+                commentLabel: 'تعليق (اختياري):',
+                commentPlaceholder: 'أدخل أي ملاحظات إضافية...',
+                addImageText: 'إضافة صورة',
+                removeImageText: 'إزالة',
+                
+                // نتائج وتقييمات
+                statusExcellent: 'ممتاز',
+                statusGood: 'جيد',
+                statusNeedsImprovement: 'يحتاج تحسين',
+                statusPoor: 'ضعيف',
+                
+                // توصيات
+                recommendations: {
+                    sort: [
+                        'قم بتنفيذ خطة منتظمة للفرز والتخلص من الأشياء غير الضرورية',
+                        'حدد أماكن واضحة للأشياء المهمة وغير المهمة',
+                        'أنشئ نظام تصنيف واضح للعناصر بناءً على تكرار الاستخدام'
+                    ],
+                    storage: [
+                        'قم بتوسيم جميع المواقع بشكل واضح ومرئي',
+                        'أنشئ خرائط مواقع للأدوات والمعدات',
+                        'طبق نظام التخزين المرئي لسهولة التعرف على العناصر'
+                    ],
+                    shine: [
+                        'ضع جدولاً زمنياً للتنظيف اليومي والأسبوعي',
+                        'وفر أدوات التنظيف في أماكن يسهل الوصول إليها',
+                        'قم بتدريب الموظفين على أهمية التنظيف كجزء من عملية الفحص'
+                    ],
+                    standardize: [
+                        'أنشئ لوحات إرشادية واضحة للمعايير والإجراءات',
+                        'طور قوائم فحص موحدة لجميع المناطق',
+                        'نفذ نظام توحيد الألوان والعلامات في جميع أنحاء المصنع'
+                    ],
+                    sustain: [
+                        'قم بإجراء مراجعات دورية للالتزام بمعايير 5S',
+                        'أنشئ نظام حوافز للمناطق الملتزمة بالمعايير',
+                        'عقد اجتماعات أسبوعية لمناقشة تحديات وتطوير نظام 5S'
+                    ]
+                },
+                
+                // رسائل
+                saveSuccess: 'تم حفظ التقييم بنجاح!',
+                saveError: 'حدث خطأ أثناء حفظ التقييم',
+                dataChanged: 'يوجد تغييرات غير محفوظة. هل تريد الحفظ قبل المتابعة؟',
+                incompleteEvaluation: 'لم يتم تقييم جميع العناصر. هل تريد المتابعة إلى النتائج على أي حال؟',
+                noSavedAudits: 'لا توجد تقييمات محفوظة',
+                loadSuccess: 'تم تحميل التقييم بنجاح',
+                deleteConfirm: 'هل أنت متأكد من رغبتك في حذف جميع التقييمات المحفوظة؟ هذا الإجراء لا يمكن التراجع عنه.',
+                deleteSuccess: 'تم حذف جميع التقييمات بنجاح',
+                exportSuccess: 'تم تصدير البيانات بنجاح',
+                importSuccess: 'تم استيراد البيانات بنجاح',
+                importError: 'خطأ في استيراد البيانات',
+                printRecommendationsTitle: 'التوصيات والملاحظات',
+                
+                // نافذة الطباعة
+                printModalTitle: 'طباعة التقرير',
+                printNowText: 'طباعة الآن',
+                cancelPrintText: 'إلغاء',
+                reportGeneratedOn: 'تم إنشاء التقرير في',
+                reportFooter: 'تم إنشاء هذا التقرير تلقائياً بواسطة نظام مراجعة وتقييم 5S',
+                
+                // نافذة البيانات
+                dataModalTitle: 'إدارة البيانات',
+                exportDataText: 'تصدير البيانات',
+                importDataText: 'استيراد البيانات',
+                exportInstructions: 'تصدير جميع التقييمات المحفوظة',
+                exportDescription: 'سيتم تصدير جميع التقييمات في ملف JSON واحد يمكنك استيراده لاحقاً.',
+                copyJsonText: 'نسخ JSON',
+                downloadJsonText: 'تحميل ملف JSON',
+                importInstructions: 'استيراد بيانات التقييمات',
+                importDescription: 'اختر ملف JSON الذي يحتوي على بيانات التقييمات المحفوظة مسبقاً.',
+                chooseFileText: 'اختر ملف JSON',
+                importJsonText: 'استيراد البيانات',
+                importWarningText: 'تحذير: استيراد البيانات سيستبدل جميع البيانات الحالية.',
+                copied: 'تم النسخ إلى الحافظة',
+                
+                // نافذة التأكيد
+                confirmModalTitle: 'تأكيد الحذف',
+                confirmDeleteText: 'نعم، احذف الكل',
+                cancelDeleteText: 'إلغاء'
+            },
+            
+            en: {
+                // UI Elements
+                appTitle: '5S Audit and Evaluation System',
+                printText: 'Print',
+                exportText: 'Export',
+                importText: 'Import',
+                savedAuditsText: 'Previous Audits',
+                saveText: 'Save Audit',
+                savedAuditsTextSidebar: 'Saved Audits',
+                manageDataText: 'Manage Data',
+                clearDataText: 'Delete Audits',
+                
+                // Step 1
+                step1Title: 'Step 1: Select Audit Level',
+                step1Desc: 'Choose the appropriate audit level to start the review process',
+                levelFactory: 'Entire Factory',
+                levelFactoryDesc: 'Comprehensive evaluation of the entire factory',
+                levelDepartment: 'Departments',
+                levelDepartmentDesc: 'Evaluate each department separately',
+                levelLine: 'Production Line',
+                levelLineDesc: 'Evaluate each production line separately',
+                levelStage: 'Stages',
+                levelStageDesc: 'Evaluate each stage within the line',
+                nextStep1Text: 'Next',
+                
+                // Step 2
+                step2Title: 'Step 2: Basic Information',
+                step2Desc: 'Enter basic audit information',
+                auditNameLabel: 'Audit Name:',
+                auditNamePlaceholder: 'Example: Main Production Factory Audit - March 2024',
+                areaNameLabel: 'Area Name:',
+                areaNamePlaceholder: 'Factory / Department / Line Name',
+                auditDateLabel: 'Audit Date:',
+                reviewerNameLabel: 'Reviewer Name:',
+                reviewerNamePlaceholder: 'Reviewer name (optional)',
+                levelCountLabel: 'Number of Units:',
+                levelCountHelp: 'Number of sub-units (departments, lines, or stages)',
+                unitNameLabel: 'Unit Name',
+                prevStep2Text: 'Previous',
+                nextStep2Text: 'Next',
+                
+                // Step 3
+                step3Title: 'Step 3: 5S Evaluation',
+                step3Desc: 'Evaluate each 5S element based on observed performance',
+                currentUnitLabel: 'Current Unit:',
+                scoreA: 'A (Excellent):',
+                scoreB: 'B (Good):',
+                scoreC: 'C (Poor):',
+                prevStep3Text: 'Previous',
+                nextStep3Text: 'View Results',
+                
+                // Step 4
+                step4Title: 'Step 4: Results and Reports',
+                step4Desc: 'Audit results and statistical analysis',
+                overallScore: 'Overall Score',
+                outOf: 'out of 69',
+                detailsTitle: 'Result Details',
+                detailArea: 'Area:',
+                detailDate: 'Date:',
+                detailReviewer: 'Reviewer:',
+                detailLevel: 'Level:',
+                radarChartTitle: '5S Radar Chart',
+                barChartTitle: 'Results Comparison',
+                detailedResultsTitle: 'Detailed Results',
+                th5s: '5S',
+                thScore: 'Score',
+                thPercentage: 'Percentage',
+                thStatus: 'Status',
+                recommendationsTitle: 'Recommendations and Notes',
+                prevStep4Text: 'Previous',
+                newAuditText: 'New Audit',
+                
+                // 5S Questions
+                sortTitle: '1. Sort (Seiri)',
+                sortDesc: 'Distinguish between what is needed and not needed',
+                sortQuestions: [
+                    'Have all unnecessary items been removed?',
+                    'Have all remaining items been organized?',
+                    'Have all aisles and work areas been identified and clarified?',
+                    'Have all unnecessary items been stored in an appropriate place?',
+                    'Is there a plan to dispose of unnecessary items?'
+                ],
+                
+                storageTitle: '2. Storage (Seiton)',
+                storageDesc: 'A place for everything and everything in its place',
+                storageQuestions: [
+                    'Is there identification and planning for each item?',
+                    'Is each item in its designated place?',
+                    'Is there ease in recognizing patterns and boundaries?',
+                    'Is it easy to see what you want and where to find it?',
+                    'Are items returned to their place after use?'
+                ],
+                
+                shineTitle: '3. Shine (Seiso)',
+                shineDesc: 'Cleaning and looking for ways to keep it clean',
+                shineQuestions: [
+                    'Are work areas clean?',
+                    'Are machines and work equipment clean?',
+                    'Are cleaning tools easily accessible?',
+                    'Are cleaning schedules and steps visible?',
+                    'Are boundary lines clear, connected, and clean?',
+                    'Is cleaning performed as a type of inspection process?'
+                ],
+                
+                standardizeTitle: '4. Standardise (Seiketsu)',
+                standardizeDesc: 'Make standards obvious and maintained',
+                standardizeQuestions: [
+                    'Are all necessary data visible?',
+                    'Are all standard specifications known and visible?',
+                    'Is there a checklist on site?',
+                    'Is there a 5S display board on site?'
+                ],
+                
+                sustainTitle: '5. Sustain (Shukan)',
+                sustainDesc: 'Stick to the rules and follow up',
+                sustainQuestions: [
+                    'Does everyone see the standard specifications?',
+                    'Are red tags used for classification?',
+                    'Are personal items placed in the correct places?'
+                ],
+                
+                // Buttons and Tools
+                commentLabel: 'Comment (optional):',
+                commentPlaceholder: 'Enter any additional notes...',
+                addImageText: 'Add Image',
+                removeImageText: 'Remove',
+                
+                // Results and Evaluations
+                statusExcellent: 'Excellent',
+                statusGood: 'Good',
+                statusNeedsImprovement: 'Needs Improvement',
+                statusPoor: 'Poor',
+                
+                // Recommendations
+                recommendations: {
+                    sort: [
+                        'Implement a regular sorting and disposal plan for unnecessary items',
+                        'Define clear locations for important and non-important items',
+                        'Create a clear classification system for items based on usage frequency'
+                    ],
+                    storage: [
+                        'Clearly label all locations visibly',
+                        'Create location maps for tools and equipment',
+                        'Implement a visual storage system for easy item identification'
+                    ],
+                    shine: [
+                        'Establish daily and weekly cleaning schedules',
+                        'Provide cleaning tools in easily accessible locations',
+                        'Train employees on the importance of cleaning as part of the inspection process'
+                    ],
+                    standardize: [
+                        'Create clear instructional boards for standards and procedures',
+                        'Develop standardized checklists for all areas',
+                        'Implement a color and marking standardization system throughout the factory'
+                    ],
+                    sustain: [
+                        'Conduct regular reviews of compliance with 5S standards',
+                        'Establish an incentive system for areas adhering to standards',
+                        'Hold weekly meetings to discuss challenges and develop the 5S system'
+                    ]
+                },
+                
+                // Messages
+                saveSuccess: 'Audit saved successfully!',
+                saveError: 'Error saving audit',
+                dataChanged: 'There are unsaved changes. Do you want to save before continuing?',
+                incompleteEvaluation: 'Not all elements have been evaluated. Do you want to proceed to results anyway?',
+                noSavedAudits: 'No saved audits',
+                loadSuccess: 'Audit loaded successfully',
+                deleteConfirm: 'Are you sure you want to delete all saved audits? This action cannot be undone.',
+                deleteSuccess: 'All audits deleted successfully',
+                exportSuccess: 'Data exported successfully',
+                importSuccess: 'Data imported successfully',
+                importError: 'Error importing data',
+                printRecommendationsTitle: 'Recommendations and Notes',
+                
+                // Print Modal
+                printModalTitle: 'Print Report',
+                printNowText: 'Print Now',
+                cancelPrintText: 'Cancel',
+                reportGeneratedOn: 'Report generated on',
+                reportFooter: 'This report was automatically generated by the 5S Audit and Evaluation System',
+                
+                // Data Modal
+                dataModalTitle: 'Data Management',
+                exportDataText: 'Export Data',
+                importDataText: 'Import Data',
+                exportInstructions: 'Export All Saved Audits',
+                exportDescription: 'All audits will be exported in a single JSON file that you can import later.',
+                copyJsonText: 'Copy JSON',
+                downloadJsonText: 'Download JSON File',
+                importInstructions: 'Import Audit Data',
+                importDescription: 'Select the JSON file containing previously saved audit data.',
+                chooseFileText: 'Choose JSON File',
+                importJsonText: 'Import Data',
+                importWarningText: 'Warning: Importing data will replace all current data.',
+                copied: 'Copied to clipboard',
+                
+                // Confirmation Modal
+                confirmModalTitle: 'Confirm Delete',
+                confirmDeleteText: 'Yes, Delete All',
+                cancelDeleteText: 'Cancel'
+            }
+        };
+
+        // ==================== تهيئة التطبيق ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // تحميل البيانات المحفوظة
+            loadSavedAudits();
+            
+            // تهيئة تاريخ اليوم
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            document.getElementById('audit-date').value = formattedDate;
+            
+            // إعداد المستمعين للأحداث
+            setupEventListeners();
+            
+            // تطبيق اللغة الحالية
+            applyLanguage();
+            
+            // إعداد الرسوم البيانية
+            initializeCharts();
+            
+            // التحقق من التغييرات
+            setupChangeDetection();
+            
+            console.log('5S Audit Tool initialized successfully');
+        }
+
+        // ==================== إدارة اللغة ====================
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'ar' ? 'en' : 'ar';
+            document.documentElement.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLanguage;
+            applyLanguage();
+        }
+
+        function applyLanguage() {
+            const t = translations[currentLanguage];
+            
+            // تحديث جميع عناصر النص
+            document.getElementById('app-title').textContent = t.appTitle;
+            document.getElementById('print-text').textContent = t.printText;
+            document.getElementById('export-text').textContent = t.exportText;
+            document.getElementById('import-text').textContent = t.importText;
+            document.getElementById('saved-audits-text').textContent = t.savedAuditsText;
+            document.getElementById('save-text').textContent = t.saveText;
+            document.getElementById('saved-audits-text-sidebar').textContent = t.savedAuditsTextSidebar;
+            document.getElementById('manage-data-text').textContent = t.manageDataText;
+            document.getElementById('clear-data-text').textContent = t.clearDataText;
+            
+            // الخطوة 1
+            document.getElementById('step1-title').textContent = t.step1Title;
+            document.getElementById('step1-desc').textContent = t.step1Desc;
+            document.getElementById('level-factory').textContent = t.levelFactory;
+            document.getElementById('level-factory-desc').textContent = t.levelFactoryDesc;
+            document.getElementById('level-department').textContent = t.levelDepartment;
+            document.getElementById('level-department-desc').textContent = t.levelDepartmentDesc;
+            document.getElementById('level-line').textContent = t.levelLine;
+            document.getElementById('level-line-desc').textContent = t.levelLineDesc;
+            document.getElementById('level-stage').textContent = t.levelStage;
+            document.getElementById('level-stage-desc').textContent = t.levelStageDesc;
+            document.getElementById('next-step1-text').textContent = t.nextStep1Text;
+            
+            // الخطوة 2
+            document.getElementById('step2-title').textContent = t.step2Title;
+            document.getElementById('step2-desc').textContent = t.step2Desc;
+            document.getElementById('audit-name-label').textContent = t.auditNameLabel;
+            document.getElementById('audit-name').placeholder = t.auditNamePlaceholder;
+            document.getElementById('area-name-label').textContent = t.areaNameLabel;
+            document.getElementById('area-name').placeholder = t.areaNamePlaceholder;
+            document.getElementById('audit-date-label').textContent = t.auditDateLabel;
+            document.getElementById('reviewer-name-label').textContent = t.reviewerNameLabel;
+            document.getElementById('reviewer-name').placeholder = t.reviewerNamePlaceholder;
+            document.getElementById('level-count-label').textContent = t.levelCountLabel;
+            document.getElementById('level-count-help').textContent = t.levelCountHelp;
+            document.getElementById('prev-step2-text').textContent = t.prevStep2Text;
+            document.getElementById('next-step2-text').textContent = t.nextStep2Text;
+            
+            // الخطوة 3
+            document.getElementById('step3-title').textContent = t.step3Title;
+            document.getElementById('step3-desc').textContent = t.step3Desc;
+            document.getElementById('current-unit-label').textContent = t.currentUnitLabel;
+            document.getElementById('score-a').textContent = t.scoreA;
+            document.getElementById('score-b').textContent = t.scoreB;
+            document.getElementById('score-c').textContent = t.scoreC;
+            document.getElementById('prev-step3-text').textContent = t.prevStep3Text;
+            document.getElementById('next-step3-text').textContent = t.nextStep3Text;
+            
+            // الخطوة 4
+            document.getElementById('step4-title').textContent = t.step4Title;
+            document.getElementById('step4-desc').textContent = t.step4Desc;
+            document.getElementById('overall-score').textContent = t.overallScore;
+            document.getElementById('out-of').textContent = t.outOf;
+            document.getElementById('details-title').textContent = t.detailsTitle;
+            document.getElementById('detail-area').textContent = t.detailArea;
+            document.getElementById('detail-date').textContent = t.detailDate;
+            document.getElementById('detail-reviewer').textContent = t.detailReviewer;
+            document.getElementById('detail-level').textContent = t.detailLevel;
+            document.getElementById('radar-chart-title').textContent = t.radarChartTitle;
+            document.getElementById('bar-chart-title').textContent = t.barChartTitle;
+            document.getElementById('detailed-results-title').textContent = t.detailedResultsTitle;
+            document.getElementById('th-5s').textContent = t.th5s;
+            document.getElementById('th-score').textContent = t.thScore;
+            document.getElementById('th-percentage').textContent = t.thPercentage;
+            document.getElementById('th-status').textContent = t.thStatus;
+            document.getElementById('recommendations-title').textContent = t.recommendationsTitle;
+            document.getElementById('prev-step4-text').textContent = t.prevStep4Text;
+            document.getElementById('new-audit-text').textContent = t.newAuditText;
+            
+            // تحديث أزرار اللغة
+            const langToggle = document.getElementById('lang-toggle');
+            langToggle.querySelector('span').textContent = currentLanguage === 'ar' ? 'English' : 'العربية';
+            
+            // تحديث النصوص في النوافذ
+            document.getElementById('print-modal-title').textContent = t.printModalTitle;
+            document.getElementById('print-now-text').textContent = t.printNowText;
+            document.getElementById('cancel-print-text').textContent = t.cancelPrintText;
+            
+            document.getElementById('data-modal-title').textContent = t.dataModalTitle;
+            document.getElementById('export-data-text').textContent = t.exportDataText;
+            document.getElementById('import-data-text').textContent = t.importDataText;
+            document.getElementById('export-instructions').textContent = t.exportInstructions;
+            document.getElementById('export-description').textContent = t.exportDescription;
+            document.getElementById('copy-json-text').textContent = t.copyJsonText;
+            document.getElementById('download-json-text').textContent = t.downloadJsonText;
+            document.getElementById('import-instructions').textContent = t.importInstructions;
+            document.getElementById('import-description').textContent = t.importDescription;
+            document.getElementById('choose-file-text').textContent = t.chooseFileText;
+            document.getElementById('import-json-text').textContent = t.importJsonText;
+            document.getElementById('import-warning-text').textContent = t.importWarningText;
+            
+            document.getElementById('confirm-modal-title').textContent = t.confirmModalTitle;
+            document.getElementById('confirm-message').textContent = t.deleteConfirm;
+            document.getElementById('confirm-delete-text').textContent = t.confirmDeleteText;
+            document.getElementById('cancel-delete-text').textContent = t.cancelDeleteText;
+            
+            // تحديث العناصر الديناميكية إذا كانت موجودة
+            updateDynamicContent();
+            
+            // تحديث قائمة التقييمات المحفوظة
+            updateSavedAuditsList();
+        }
+
+        // ==================== إدارة الخطوات ====================
+        function goToStep(step) {
+            // التحقق من وجود تغييرات غير محفوظة
+            if (isDataChanged && step !== currentStep) {
+                const t = translations[currentLanguage];
+                if (confirm(t.dataChanged)) {
+                    saveAudit();
+                }
+            }
+            
+            // إخفاء جميع الخطوات
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            
+            // إظهار الخطوة المطلوبة
+            document.getElementById(`step${step}`).classList.add('active');
+            currentStep = step;
+            
+            // إظهار أو إخفاء زر الحفظ
+            const saveBtn = document.getElementById('save-audit-btn');
+            if (step === 3 || step === 4) {
+                saveBtn.classList.remove('hidden');
+            } else {
+                saveBtn.classList.add('hidden');
+            }
+            
+            // تحديث المحتوى الديناميكي حسب الخطوة
+            if (step === 2) {
+                setupStep2();
+            } else if (step === 3) {
+                setupStep3();
+            } else if (step === 4) {
+                calculateResults();
+                displayResults();
+            }
+        }
+
+        function setupStep2() {
+            const unitsContainer = document.getElementById('units-container');
+            const levelCount = parseInt(document.getElementById('level-count').value) || 1;
+            
+            // إزالة الحقول القديمة
+            unitsContainer.innerHTML = '';
+            
+            // إضافة حقول جديدة
+            const t = translations[currentLanguage];
+            const levelNames = {
+                'factory': 'المصنع',
+                'department': 'القسم',
+                'production-line': 'خط الإنتاج',
+                'stage': 'المرحلة'
+            };
+            
+            const levelName = levelNames[selectedLevel] || 'الوحدة';
+            
+            for (let i = 0; i < levelCount; i++) {
+                const unitField = document.createElement('div');
+                unitField.className = 'unit-field';
+                unitField.innerHTML = `
+                    <h4>${levelName} ${i + 1}</h4>
+                    <div class="form-group">
+                        <label for="unit-name-${i}">${t.unitNameLabel} ${i + 1}:</label>
+                        <input type="text" id="unit-name-${i}" placeholder="${levelName} ${i + 1}" class="data-input">
+                    </div>
+                `;
+                unitsContainer.appendChild(unitField);
+            }
+            
+            // إضافة مستمعي الأحداث للحقول الجديدة
+            document.querySelectorAll('.data-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    isDataChanged = true;
+                });
+            });
+        }
+
+        function setupStep3() {
+            // جمع بيانات الوحدات
+            collectUnitsData();
+            
+            // تهيئة التقييمات
+            initializeEvaluations();
+            
+            // عرض واجهة التقييم
+            displayEvaluationForm();
+        }
+
+        function collectUnitsData() {
+            const levelCount = parseInt(document.getElementById('level-count').value) || 1;
+            auditData.units = [];
+            
+            for (let i = 0; i < levelCount; i++) {
+                const unitName = document.getElementById(`unit-name-${i}`)?.value || 
+                                `${translations[currentLanguage]['level' + capitalizeFirstLetter(selectedLevel)]} ${i + 1}`;
+                
+                auditData.units.push({
+                    id: i,
+                    name: unitName
+                });
+            }
+            
+            // تحديث قائمة الوحدات في الخطوة 3
+            const unitSelect = document.getElementById('current-unit');
+            unitSelect.innerHTML = '';
+            
+            auditData.units.forEach((unit, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = unit.name;
+                unitSelect.appendChild(option);
+            });
+        }
+
+        function initializeEvaluations() {
+            auditData.evaluations = [];
+            
+            auditData.units.forEach((unit, unitIndex) => {
+                const evaluation = {
+                    unitId: unit.id,
+                    unitName: unit.name,
+                    categories: {
+                        sort: { answers: Array(5).fill(null), comments: '', images: [], score: 0 },
+                        storage: { answers: Array(5).fill(null), comments: '', images: [], score: 0 },
+                        shine: { answers: Array(6).fill(null), comments: '', images: [], score: 0 },
+                        standardize: { answers: Array(4).fill(null), comments: '', images: [], score: 0 },
+                        sustain: { answers: Array(3).fill(null), comments: '', images: [], score: 0 }
+                    },
+                    totalScore: 0
+                };
+                
+                auditData.evaluations.push(evaluation);
+            });
+        }
+
+        function displayEvaluationForm() {
+            const container = document.getElementById('5s-sections');
+            const t = translations[currentLanguage];
+            
+            container.innerHTML = '';
+            
+            // تعريف هيكل 5S
+            const s5Structure = [
+                {
+                    id: 'sort',
+                    title: t.sortTitle,
+                    desc: t.sortDesc,
+                    questions: t.sortQuestions,
+                    icon: 'fas fa-filter'
+                },
+                {
+                    id: 'storage',
+                    title: t.storageTitle,
+                    desc: t.storageDesc,
+                    questions: t.storageQuestions,
+                    icon: 'fas fa-box'
+                },
+                {
+                    id: 'shine',
+                    title: t.shineTitle,
+                    desc: t.shineDesc,
+                    questions: t.shineQuestions,
+                    icon: 'fas fa-broom'
+                },
+                {
+                    id: 'standardize',
+                    title: t.standardizeTitle,
+                    desc: t.standardizeDesc,
+                    questions: t.standardizeQuestions,
+                    icon: 'fas fa-clipboard-list'
+                },
+                {
+                    id: 'sustain',
+                    title: t.sustainTitle,
+                    desc: t.sustainDesc,
+                    questions: t.sustainQuestions,
+                    icon: 'fas fa-user-check'
+                }
+            ];
+            
+            // إنشاء أقسام 5S
+            s5Structure.forEach((section, sectionIndex) => {
+                const sectionEl = document.createElement('div');
+                sectionEl.className = 's5-section';
+                sectionEl.id = `section-${section.id}`;
+                sectionEl.style.animationDelay = `${sectionIndex * 0.1}s`;
+                
+                let questionsHTML = '';
+                section.questions.forEach((question, qIndex) => {
+                    questionsHTML += `
+                        <div class="question-item" data-category="${section.id}" data-question="${qIndex}">
+                            <div class="question-text">${qIndex + 1}. ${question}</div>
+                            <div class="answer-options">
+                                <div class="answer-option">
+                                    <input type="radio" id="${section.id}-${qIndex}-A" name="${section.id}-${qIndex}" value="A" class="answer-input">
+                                    <label for="${section.id}-${qIndex}-A" class="answer-label A">A</label>
+                                </div>
+                                <div class="answer-option">
+                                    <input type="radio" id="${section.id}-${qIndex}-B" name="${section.id}-${qIndex}" value="B" class="answer-input">
+                                    <label for="${section.id}-${qIndex}-B" class="answer-label B">B</label>
+                                </div>
+                                <div class="answer-option">
+                                    <input type="radio" id="${section.id}-${qIndex}-C" name="${section.id}-${qIndex}" value="C" class="answer-input">
+                                    <label for="${section.id}-${qIndex}-C" class="answer-label C">C</label>
+                                </div>
+                            </div>
+                            <div class="comment-section">
+                                <label>${t.commentLabel}</label>
+                                <textarea class="comment-input" data-category="${section.id}" data-question="${qIndex}" placeholder="${t.commentPlaceholder}" class="data-input"></textarea>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                sectionEl.innerHTML = `
+                    <div class="s5-header">
+                        <div class="s5-title">
+                            <i class="${section.icon}"></i>
+                            <span>${section.title}</span>
+                        </div>
+                        <div class="s5-score" id="score-${section.id}">0</div>
+                    </div>
+                    <div class="s5-questions">
+                        ${questionsHTML}
+                    </div>
+                `;
+                
+                container.appendChild(sectionEl);
+            });
+            
+            // إضافة مستمعي الأحداث للإجابات
+            setupAnswerListeners();
+        }
+
+        function setupAnswerListeners() {
+            // مستمعات لاختيارات الإجابات
+            document.querySelectorAll('.answer-input').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const category = this.name.split('-')[0];
+                    const questionIndex = parseInt(this.name.split('-')[1]);
+                    const answer = this.value;
+                    
+                    updateEvaluation(category, questionIndex, answer);
+                    updateSectionScore(category);
+                    isDataChanged = true;
+                });
+            });
+            
+            // مستمعات للتعليقات
+            document.querySelectorAll('.comment-input').forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    const category = this.dataset.category;
+                    const questionIndex = parseInt(this.dataset.question);
+                    const comment = this.value;
+                    
+                    updateComment(category, questionIndex, comment);
+                    isDataChanged = true;
+                });
+            });
+            
+            // مستمع لتغيير الوحدة
+            document.getElementById('current-unit').addEventListener('change', function() {
+                currentUnitIndex = parseInt(this.value);
+                loadEvaluationData(currentUnitIndex);
+            });
+        }
+
+        function updateEvaluation(category, questionIndex, answer) {
+            if (!auditData.evaluations[currentUnitIndex]) return;
+            
+            auditData.evaluations[currentUnitIndex].categories[category].answers[questionIndex] = answer;
+            calculateScores();
+        }
+
+        function updateComment(category, questionIndex, comment) {
+            if (!auditData.evaluations[currentUnitIndex]) return;
+            
+            // في هذا المثال، سنحفظ تعليقاً واحداً لكل قسم
+            auditData.evaluations[currentUnitIndex].categories[category].comments = comment;
+        }
+
+        function updateSectionScore(category) {
+            const evaluation = auditData.evaluations[currentUnitIndex];
+            if (!evaluation) return;
+            
+            const categoryData = evaluation.categories[category];
+            let score = 0;
+            
+            categoryData.answers.forEach(answer => {
+                if (answer === 'A') score += 3;
+                else if (answer === 'B') score += 1;
+                // C تساوي 0
+            });
+            
+            categoryData.score = score;
+            document.getElementById(`score-${category}`).textContent = score;
+        }
+
+        function calculateScores() {
+            if (!auditData.evaluations[currentUnitIndex]) return;
+            
+            const evaluation = auditData.evaluations[currentUnitIndex];
+            let totalScore = 0;
+            
+            // حساب درجات كل قسم
+            Object.keys(evaluation.categories).forEach(category => {
+                updateSectionScore(category);
+                totalScore += evaluation.categories[category].score;
+            });
+            
+            evaluation.totalScore = totalScore;
+        }
+
+        function loadEvaluationData(unitIndex) {
+            const evaluation = auditData.evaluations[unitIndex];
+            if (!evaluation) return;
+            
+            // تحميل الإجابات
+            Object.keys(evaluation.categories).forEach(category => {
+                const categoryData = evaluation.categories[category];
+                
+                categoryData.answers.forEach((answer, qIndex) => {
+                    if (answer) {
+                        const radio = document.getElementById(`${category}-${qIndex}-${answer}`);
+                        if (radio) radio.checked = true;
+                    }
+                });
+                
+                // تحديث النتيجة المعروضة
+                document.getElementById(`score-${category}`).textContent = categoryData.score;
+            });
+            
+            // تحميل التعليقات
+            document.querySelectorAll('.comment-input').forEach(textarea => {
+                const category = textarea.dataset.category;
+                const questionIndex = parseInt(textarea.dataset.question);
+                textarea.value = evaluation.categories[category]?.comments || '';
+            });
+        }
+
+        // ==================== حساب النتائج ====================
+        function calculateResults() {
+            // جمع بيانات التقييم
+            auditData.results = {
+                categories: {},
+                overall: {}
+            };
+            
+            // تهيئة المجاميع
+            const categoryTotals = {
+                sort: { total: 0, max: 15, count: 0 },
+                storage: { total: 0, max: 15, count: 0 },
+                shine: { total: 0, max: 18, count: 0 },
+                standardize: { total: 0, max: 12, count: 0 },
+                sustain: { total: 0, max: 9, count: 0 }
+            };
+            
+            let overallTotal = 0;
+            const maxOverall = 69; // مجموع الدرجات القصوى
+            
+            // حساب مجاميع الوحدات
+            auditData.evaluations.forEach(evaluation => {
+                Object.keys(evaluation.categories).forEach(category => {
+                    categoryTotals[category].total += evaluation.categories[category].score;
+                    categoryTotals[category].count++;
+                });
+                overallTotal += evaluation.totalScore;
+            });
+            
+            // حساب المتوسطات والنسب المئوية
+            Object.keys(categoryTotals).forEach(category => {
+                const avg = categoryTotals[category].total / Math.max(categoryTotals[category].count, 1);
+                const percentage = (avg / categoryTotals[category].max) * 100;
+                
+                auditData.results.categories[category] = {
+                    score: Math.round(avg * 10) / 10,
+                    max: categoryTotals[category].max,
+                    percentage: Math.round(percentage),
+                    status: getStatus(percentage)
+                };
+            });
+            
+            // حساب النتيجة العامة
+            const overallAvg = overallTotal / Math.max(auditData.evaluations.length, 1);
+            const overallPercentage = (overallAvg / maxOverall) * 100;
+            
+            auditData.results.overall = {
+                score: Math.round(overallAvg * 10) / 10,
+                max: maxOverall,
+                percentage: Math.round(overallPercentage),
+                status: getStatus(overallPercentage)
+            };
+        }
+
+        function getStatus(percentage) {
+            if (percentage >= 85) return 'excellent';
+            if (percentage >= 70) return 'good';
+            if (percentage >= 50) return 'needs-improvement';
+            return 'poor';
+        }
+
+        function displayResults() {
+            const t = translations[currentLanguage];
+            
+            // عرض النتيجة العامة
+            document.getElementById('total-score').textContent = auditData.results.overall.score;
+            const descriptionText = t[`status${capitalizeFirstLetter(auditData.results.overall.status)}`];
+            document.getElementById('score-description-text').textContent = descriptionText;
+            
+            // تحديث لون الوصف حسب الحالة
+            const descriptionEl = document.getElementById('score-description-text');
+            descriptionEl.className = 'score-description';
+            descriptionEl.classList.add(`status-${auditData.results.overall.status}`);
+            
+            // عرض التفاصيل
+            document.getElementById('detail-area-value').textContent = auditData.area || '-';
+            document.getElementById('detail-date-value').textContent = formatDate(auditData.date) || '-';
+            document.getElementById('detail-reviewer-value').textContent = auditData.reviewer || '-';
+            document.getElementById('detail-level-value').textContent = getLevelName(auditData.level);
+            
+            // تحديث الجدول
+            const tableBody = document.getElementById('results-table-body');
+            tableBody.innerHTML = '';
+            
+            const categories = ['sort', 'storage', 'shine', 'standardize', 'sustain'];
+            const categoryNames = {
+                sort: t.sortTitle,
+                storage: t.storageTitle,
+                shine: t.shineTitle,
+                standardize: t.standardizeTitle,
+                sustain: t.sustainTitle
+            };
+            
+            categories.forEach(category => {
+                const result = auditData.results.categories[category];
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${categoryNames[category]}</td>
+                    <td>${result.score}/${result.max}</td>
+                    <td>${result.percentage}%</td>
+                    <td><span class="status-badge status-${result.status}">${t[`status${capitalizeFirstLetter(result.status)}`]}</span></td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // عرض التوصيات
+            displayRecommendations();
+            
+            // تحديث الرسوم البيانية
+            updateCharts();
+            
+            // إخفاء زر الحفظ إذا كان التقييم محفوظاً
+            if (auditData.isSaved) {
+                document.getElementById('save-audit-btn').classList.add('hidden');
+            }
+        }
+
+        function displayRecommendations() {
+            const t = translations[currentLanguage];
+            const container = document.getElementById('recommendations-content');
+            
+            let html = '';
+            
+            const categories = ['sort', 'storage', 'shine', 'standardize', 'sustain'];
+            const categoryNames = {
+                sort: t.sortTitle,
+                storage: t.storageTitle,
+                shine: t.shineTitle,
+                standardize: t.standardizeTitle,
+                sustain: t.sustainTitle
+            };
+            
+            categories.forEach(category => {
+                const result = auditData.results.categories[category];
+                
+                if (result.status === 'poor' || result.status === 'needs-improvement') {
+                    const recs = t.recommendations[category];
+                    
+                    if (recs && recs.length > 0) {
+                        html += `<div class="recommendation-item">
+                            <strong>${categoryNames[category]}:</strong><br>
+                            <ul>`;
+                        
+                        recs.forEach(rec => {
+                            html += `<li>${rec}</li>`;
+                        });
+                        
+                        html += `</ul></div>`;
+                    }
+                }
+            });
+            
+            if (html === '') {
+                html = `<div class="recommendation-item">
+                    <strong>${t.statusExcellent}:</strong><br>
+                    أداء ممتاز في جميع مجالات 5S. استمر في الحفاظ على هذا المستوى!
+                </div>`;
+            }
+            
+            container.innerHTML = html;
+            
+            // أيضًا إنشاء نسخة للطباعة
+            createPrintRecommendations();
+        }
+
+        function createPrintRecommendations() {
+            const t = translations[currentLanguage];
+            const container = document.getElementById('print-recommendations-section');
+            
+            let html = `<h3>${t.printRecommendationsTitle}</h3>`;
+            
+            const categories = ['sort', 'storage', 'shine', 'standardize', 'sustain'];
+            const categoryNames = {
+                sort: t.sortTitle,
+                storage: t.storageTitle,
+                shine: t.shineTitle,
+                standardize: t.standardizeTitle,
+                sustain: t.sustainTitle
+            };
+            
+            categories.forEach(category => {
+                const result = auditData.results.categories[category];
+                
+                if (result.status === 'poor' || result.status === 'needs-improvement') {
+                    const recs = t.recommendations[category];
+                    
+                    if (recs && recs.length > 0) {
+                        html += `<div class="print-recommendation-item">
+                            <strong>${categoryNames[category]}:</strong><br>
+                            <ul>`;
+                        
+                        recs.forEach(rec => {
+                            html += `<li>${rec}</li>`;
+                        });
+                        
+                        html += `</ul></div>`;
+                    }
+                }
+            });
+            
+            if (html === `<h3>${t.printRecommendationsTitle}</h3>`) {
+                html += `<div class="print-recommendation-item">
+                    <strong>${t.statusExcellent}:</strong><br>
+                    أداء ممتاز في جميع مجالات 5S. استمر في الحفاظ على هذا المستوى!
+                </div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // ==================== الرسوم البيانية ====================
+        function initializeCharts() {
+            // إعداد مخطط الرادار
+            const radarCtx = document.getElementById('radarChart').getContext('2d');
+            radarChart = new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['الفرز', 'التنظيم', 'التنظيف', 'التقييس', 'الانضباط'],
+                    datasets: [{
+                        label: 'نتائج 5S',
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(229, 57, 53, 0.2)',
+                        borderColor: 'rgba(229, 57, 53, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(229, 57, 53, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(229, 57, 53, 1)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            
+            // إعداد مخطط الأعمدة
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['الفرز', 'التنظيم', 'التنظيف', 'التقييس', 'الانضباط', 'المجموع'],
+                    datasets: [{
+                        label: 'النتيجة',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: [
+                            'rgba(76, 175, 80, 0.7)',
+                            'rgba(33, 150, 243, 0.7)',
+                            'rgba(255, 152, 0, 0.7)',
+                            'rgba(156, 39, 176, 0.7)',
+                            'rgba(244, 67, 54, 0.7)',
+                            'rgba(96, 125, 139, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(76, 175, 80)',
+                            'rgb(33, 150, 243)',
+                            'rgb(255, 152, 0)',
+                            'rgb(156, 39, 176)',
+                            'rgb(244, 67, 54)',
+                            'rgb(96, 125, 139)'
+                        ],
+                        borderWidth: 1
+                    }, {
+                        label: 'الحد الأقصى',
+                        data: [15, 15, 18, 12, 9, 69],
+                        backgroundColor: 'rgba(189, 189, 189, 0.3)',
+                        borderColor: 'rgba(189, 189, 189, 1)',
+                        borderWidth: 1,
+                        type: 'bar'
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'الدرجات'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += context.parsed.y;
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts() {
+            if (!auditData.results.categories) return;
+            
+            // تحديث مخطط الرادار
+            const radarData = [
+                auditData.results.categories.sort.percentage,
+                auditData.results.categories.storage.percentage,
+                auditData.results.categories.shine.percentage,
+                auditData.results.categories.standardize.percentage,
+                auditData.results.categories.sustain.percentage
+            ];
+            
+            radarChart.data.datasets[0].data = radarData;
+            radarChart.update();
+            
+            // تحديث مخطط الأعمدة
+            const barData = [
+                auditData.results.categories.sort.score,
+                auditData.results.categories.storage.score,
+                auditData.results.categories.shine.score,
+                auditData.results.categories.standardize.score,
+                auditData.results.categories.sustain.score,
+                auditData.results.overall.score
+            ];
+            
+            barChart.data.datasets[0].data = barData;
+            barChart.update();
+        }
+
+        // ==================== إدارة البيانات المحفوظة ====================
+        function saveAudit() {
+            try {
+                // تحديث بيانات التقييم
+                auditData.name = document.getElementById('audit-name').value || 'تقييم بدون عنوان';
+                auditData.area = document.getElementById('area-name').value || 'منطقة غير محددة';
+                auditData.date = document.getElementById('audit-date').value || new Date().toISOString().split('T')[0];
+                auditData.reviewer = document.getElementById('reviewer-name').value || '';
+                auditData.level = selectedLevel;
+                
+                // إنشاء معرف فريد إذا لم يكن موجوداً
+                if (!auditData.id) {
+                    auditData.id = 'audit_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    auditData.createdAt = new Date().toISOString();
+                }
+                
+                // تحديث وقت التعديل
+                auditData.updatedAt = new Date().toISOString();
+                auditData.isSaved = true;
+                
+                // البحث عن التقييم الحالي في القائمة
+                const existingIndex = savedAudits.findIndex(a => a.id === auditData.id);
+                
+                if (existingIndex >= 0) {
+                    // تحديث التقييم الموجود
+                    savedAudits[existingIndex] = JSON.parse(JSON.stringify(auditData));
+                } else {
+                    // إضافة تقييم جديد
+                    savedAudits.push(JSON.parse(JSON.stringify(auditData)));
+                }
+                
+                // حفظ في LocalStorage
+                localStorage.setItem('5s_audits', JSON.stringify(savedAudits));
+                
+                // تحديث القائمة الجانبية
+                updateSavedAuditsList();
+                
+                // إعادة تعيين علامة التغيير
+                isDataChanged = false;
+                
+                // إظهار رسالة نجاح
+                showMessage(translations[currentLanguage].saveSuccess, 'success');
+                
+                console.log('Audit saved successfully:', auditData.id);
+                return true;
+            } catch (error) {
+                console.error('Error saving audit:', error);
+                showMessage(translations[currentLanguage].saveError, 'error');
+                return false;
+            }
+        }
+
+        function loadSavedAudits() {
+            const savedData = localStorage.getItem('5s_audits');
+            
+            if (savedData) {
+                try {
+                    savedAudits = JSON.parse(savedData);
+                    console.log(`Loaded ${savedAudits.length} saved audits`);
+                } catch (e) {
+                    console.error('Error loading saved data:', e);
+                    savedAudits = [];
+                }
+            } else {
+                savedAudits = [];
+            }
+            
+            updateSavedAuditsList();
+        }
+
+        function updateSavedAuditsList() {
+            const container = document.getElementById('saved-list');
+            const t = translations[currentLanguage];
+            
+            container.innerHTML = '';
+            
+            if (savedAudits.length === 0) {
+                container.innerHTML = `<div class="no-data">${t.noSavedAudits}</div>`;
+                return;
+            }
+            
+            // ترتيب التقييمات من الأحدث إلى الأقدم
+            savedAudits.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            savedAudits.forEach((audit, index) => {
+                const item = document.createElement('div');
+                item.className = 'saved-audit-item';
+                item.dataset.id = audit.id;
+                
+                const date = new Date(audit.createdAt);
+                const formattedDate = date.toLocaleDateString(currentLanguage === 'ar' ? 'ar-SA' : 'en-US');
+                const formattedTime = date.toLocaleTimeString(currentLanguage === 'ar' ? 'ar-SA' : 'en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                item.innerHTML = `
+                    <h4>
+                        <span>${audit.name}</span>
+                        <i class="fas fa-star" style="color: ${audit.id === auditData.id ? '#FFD700' : '#ccc'}; font-size: 0.9rem;"></i>
+                    </h4>
+                    <p><strong>${t.area || 'المنطقة'}:</strong> ${audit.area}</p>
+                    <p><strong>${t.date || 'التاريخ'}:</strong> ${formattedDate}</p>
+                    <p><strong>${t.level || 'المستوى'}:</strong> ${getLevelName(audit.level)}</p>
+                    <p><strong>تم الإنشاء:</strong> ${formattedTime}</p>
+                    <div class="saved-audit-actions">
+                        <button class="btn btn-outline btn-small load-audit-btn" data-id="${audit.id}">
+                            <i class="fas fa-eye"></i> عرض
+                        </button>
+                        <button class="btn btn-secondary btn-small delete-single-audit-btn" data-id="${audit.id}">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+            
+            // إضافة مستمعي الأحداث للأزرار
+            document.querySelectorAll('.load-audit-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    loadAuditById(this.dataset.id);
+                });
+            });
+            
+            document.querySelectorAll('.delete-single-audit-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    deleteSingleAudit(this.dataset.id);
+                });
+            });
+        }
+
+        function loadAuditById(auditId) {
+            const audit = savedAudits.find(a => a.id === auditId);
+            if (!audit) return;
+            
+            // حفظ التقييم الحالي إذا كان هناك تغييرات
+            if (isDataChanged) {
+                const t = translations[currentLanguage];
+                if (confirm(t.dataChanged)) {
+                    saveAudit();
+                }
+            }
+            
+            // تحميل التقييم المحدد
+            auditData = JSON.parse(JSON.stringify(audit));
+            
+            // تحديث واجهة المستخدم
+            document.getElementById('audit-name').value = auditData.name;
+            document.getElementById('area-name').value = auditData.area;
+            document.getElementById('audit-date').value = auditData.date;
+            document.getElementById('reviewer-name').value = auditData.reviewer || '';
+            selectedLevel = auditData.level;
+            
+            // تحديث اختيار المستوى
+            document.querySelectorAll('.level-card').forEach(card => {
+                card.classList.remove('selected');
+                if (card.dataset.level === selectedLevel) {
+                    card.classList.add('selected');
+                }
+            });
+            
+            // تحديث عدد الوحدات
+            if (auditData.units.length > 0) {
+                document.getElementById('level-count').value = auditData.units.length;
+                setupStep2();
+                
+                // تحديث أسماء الوحدات
+                auditData.units.forEach((unit, index) => {
+                    const input = document.getElementById(`unit-name-${index}`);
+                    if (input) input.value = unit.name;
+                });
+            }
+            
+            // الانتقال للخطوة 4 لعرض النتائج
+            goToStep(4);
+            
+            // إغلاق القائمة الجانبية
+            document.querySelector('.saved-audits-sidebar').classList.remove('open');
+            
+            // إظهار رسالة نجاح
+            showMessage(translations[currentLanguage].loadSuccess, 'success');
+        }
+
+        function deleteSingleAudit(auditId) {
+            const t = translations[currentLanguage];
+            if (confirm(`هل أنت متأكد من رغبتك في حذف هذا التقييم؟`)) {
+                savedAudits = savedAudits.filter(a => a.id !== auditId);
+                localStorage.setItem('5s_audits', JSON.stringify(savedAudits));
+                updateSavedAuditsList();
+                
+                // إذا كان التقييم المحذوف هو الحالي، إعادة تعيين البيانات
+                if (auditData.id === auditId) {
+                    resetAuditData();
+                }
+                
+                showMessage('تم حذف التقييم بنجاح', 'success');
+            }
+        }
+
+        function clearAllAudits() {
+            const t = translations[currentLanguage];
+            document.getElementById('confirm-modal').classList.add('active');
+        }
+
+        function confirmClearAllAudits() {
+            savedAudits = [];
+            localStorage.removeItem('5s_audits');
+            updateSavedAuditsList();
+            resetAuditData();
+            document.getElementById('confirm-modal').classList.remove('active');
+            showMessage(translations[currentLanguage].deleteSuccess, 'success');
+        }
+
+        function resetAuditData() {
+            auditData = {
+                id: null,
+                name: '',
+                level: '',
+                area: '',
+                date: '',
+                reviewer: '',
+                units: [],
+                evaluations: [],
+                results: {},
+                createdAt: null,
+                isSaved: false
+            };
+            
+            currentUnitIndex = 0;
+            isDataChanged = false;
+            
+            // إعادة تعيين النماذج
+            document.getElementById('audit-name').value = '';
+            document.getElementById('area-name').value = '';
+            document.getElementById('audit-date').valueAsDate = new Date();
+            document.getElementById('reviewer-name').value = '';
+            document.getElementById('level-count').value = 1;
+            
+            // إعادة تعيين اختيار المستوى
+            document.querySelectorAll('.level-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // العودة للخطوة 1
+            goToStep(1);
+        }
+
+        // ==================== التصدير والاستيراد ====================
+        function exportData() {
+            try {
+                const dataStr = JSON.stringify(savedAudits, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = `5s_audits_${new Date().toISOString().split('T')[0]}.json`;
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+                
+                showMessage(translations[currentLanguage].exportSuccess, 'success');
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                showMessage('خطأ في تصدير البيانات', 'error');
+            }
+        }
+
+        function importData() {
+            const fileInput = document.getElementById('json-file');
+            
+            if (!fileInput.files.length) {
+                showMessage('يرجى اختيار ملف أولاً', 'error');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (Array.isArray(importedData)) {
+                        savedAudits = importedData;
+                        localStorage.setItem('5s_audits', JSON.stringify(savedAudits));
+                        updateSavedAuditsList();
+                        
+                        showMessage(`${translations[currentLanguage].importSuccess} (${importedData.length} تقييم)`, 'success');
+                        
+                        // إغلاق النافذة
+                        document.getElementById('data-modal').classList.remove('active');
+                    } else {
+                        throw new Error('تنسيق البيانات غير صالح');
+                    }
+                } catch (error) {
+                    console.error('Import error:', error);
+                    showMessage(`${translations[currentLanguage].importError}: ${error.message}`, 'error');
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // ==================== الطباعة ====================
+        function printReport() {
+            if (!auditData.results || Object.keys(auditData.results).length === 0) {
+                showMessage('لا توجد نتائج لعرضها. يرجى إكمال التقييم أولاً.', 'error');
+                return;
+            }
+            
+            createPrintPreview();
+            document.getElementById('print-modal').classList.add('active');
+        }
+
+        function createPrintPreview() {
+            const t = translations[currentLanguage];
+            const printPreview = document.getElementById('print-preview');
+            
+            const printDate = new Date().toLocaleDateString(currentLanguage === 'ar' ? 'ar-SA' : 'en-US');
+            const auditDate = formatDate(auditData.date) || printDate;
+            
+            let html = `
+                <div class="print-header">
+                    <div class="print-logo">
+                        <i class="fas fa-industry"></i>
+                    </div>
+                    <h1 class="print-title">${t.appTitle}</h1>
+                    <p class="print-subtitle">${t.reportGeneratedOn} ${printDate}</p>
+                </div>
+                
+                <div class="print-meta">
+                    <div>
+                        <strong>${t.auditNameLabel}:</strong> ${auditData.name}<br>
+                        <strong>${t.detailArea}:</strong> ${auditData.area}<br>
+                        <strong>${t.detailLevel}:</strong> ${getLevelName(auditData.level)}
+                    </div>
+                    <div>
+                        <strong>${t.detailDate}:</strong> ${auditDate}<br>
+                        <strong>${t.detailReviewer}:</strong> ${auditData.reviewer || 'غير محدد'}<br>
+                        <strong>عدد الوحدات:</strong> ${auditData.units.length}
+                    </div>
+                </div>
+                
+                <div class="print-section">
+                    <h3>${t.overallScore}</h3>
+                    <div class="print-score">
+                        <div class="print-score-value">${auditData.results.overall.score}/${auditData.results.overall.max}</div>
+                        <div class="print-score-percentage">${auditData.results.overall.percentage}%</div>
+                        <div style="font-size: 1.5rem; color: ${getStatusColor(auditData.results.overall.status)}; font-weight: bold;">
+                            ${t[`status${capitalizeFirstLetter(auditData.results.overall.status)}`]}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="print-section">
+                    <h3>${t.detailedResultsTitle}</h3>
+                    <table class="print-table">
+                        <thead>
+                            <tr>
+                                <th>${t.th5s}</th>
+                                <th>${t.thScore}</th>
+                                <th>${t.thPercentage}</th>
+                                <th>${t.thStatus}</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+            
+            const categories = ['sort', 'storage', 'shine', 'standardize', 'sustain'];
+            const categoryNames = {
+                sort: t.sortTitle,
+                storage: t.storageTitle,
+                shine: t.shineTitle,
+                standardize: t.standardizeTitle,
+                sustain: t.sustainTitle
+            };
+            
+            categories.forEach(category => {
+                const result = auditData.results.categories[category];
+                html += `
+                    <tr>
+                        <td>${categoryNames[category]}</td>
+                        <td>${result.score}/${result.max}</td>
+                        <td>${result.percentage}%</td>
+                        <td style="color: ${getStatusColor(result.status)}">${t[`status${capitalizeFirstLetter(result.status)}`]}</td>
+                    </tr>`;
+            });
+            
+            html += `</tbody>
+                    </table>
+                </div>`;
+            
+            // إضافة قسم التوصيات من النسخة المعدة للطباعة
+            const printRecs = document.getElementById('print-recommendations-section').innerHTML;
+            html += `<div class="print-section">${printRecs}</div>`;
+            
+            html += `
+                <div class="print-footer">
+                    <p>${t.reportFooter}</p>
+                </div>`;
+            
+            printPreview.innerHTML = html;
+        }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case 'excellent': return '#4CAF50';
+                case 'good': return '#2196F3';
+                case 'needs-improvement': return '#FF9800';
+                case 'poor': return '#F44336';
+                default: return '#666';
+            }
+        }
+
+        // ==================== أدوات مساعدة ====================
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+            
+            return date.toLocaleDateString(currentLanguage === 'ar' ? 'ar-SA' : 'en-US');
+        }
+
+        function getLevelName(level) {
+            const t = translations[currentLanguage];
+            switch(level) {
+                case 'factory': return t.levelFactory;
+                case 'department': return t.levelDepartment;
+                case 'production-line': return t.levelLine;
+                case 'stage': return t.levelStage;
+                default: return level;
+            }
+        }
+
+        function updateDynamicContent() {
+            // تحديث المحتوى الديناميكي حسب الحاجة
+            if (currentStep === 3) {
+                displayEvaluationForm();
+            }
+            if (currentStep === 4 && auditData.results) {
+                displayResults();
+            }
+        }
+
+        function showMessage(message, type = 'info') {
+            // إنشاء عنصر الرسالة
+            const messageEl = document.createElement('div');
+            messageEl.className = `message message-${type}`;
+            messageEl.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            // إضافة الأنماط الديناميكية
+            messageEl.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#F44336' : '#2196F3'};
+                color: white;
+                padding: 15px 25px;
+                border-radius: var(--border-radius);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                z-index: 10000;
+                animation: slideInRight 0.3s ease;
+                max-width: 400px;
+            `;
+            
+            document.body.appendChild(messageEl);
+            
+            // إزالة الرسالة بعد 5 ثوان
+            setTimeout(() => {
+                messageEl.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => {
+                    if (messageEl.parentNode) {
+                        messageEl.parentNode.removeChild(messageEl);
+                    }
+                }, 300);
+            }, 5000);
+            
+            // إضافة أنيميشن الخروج
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeOut {
+                    from { opacity: 1; }
+                    to { opacity: 0; transform: translateX(30px); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        function setupChangeDetection() {
+            // اكتشاف التغييرات في الحقول
+            document.querySelectorAll('input, textarea, select').forEach(input => {
+                input.addEventListener('input', function() {
+                    if (!this.classList.contains('data-input')) {
+                        this.classList.add('data-input');
+                    }
+                    isDataChanged = true;
+                });
+            });
+            
+            // اكتشاف التغييرات في اختيارات الراديو
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    isDataChanged = true;
+                });
+            });
+        }
+
+        // ==================== إعداد مستمعي الأحداث ====================
+        function setupEventListeners() {
+            // تبديل اللغة
+            document.getElementById('lang-toggle').addEventListener('click', toggleLanguage);
+            
+            // الخطوة 1: اختيار مستوى التقييم
+            document.querySelectorAll('.level-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('.level-card').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedLevel = this.dataset.level;
+                    isDataChanged = true;
+                });
+            });
+            
+            document.getElementById('next-step1').addEventListener('click', function() {
+                if (!selectedLevel) {
+                    showMessage('يرجى اختيار مستوى التقييم', 'error');
+                    return;
+                }
+                goToStep(2);
+            });
+            
+            // الخطوة 2: تغيير عدد الوحدات
+            document.getElementById('level-count').addEventListener('change', function() {
+                setupStep2();
+                isDataChanged = true;
+            });
+            
+            document.getElementById('prev-step2').addEventListener('click', function() {
+                goToStep(1);
+            });
+            
+            document.getElementById('next-step2').addEventListener('click', function() {
+                // التحقق من صحة البيانات الأساسية
+                if (!document.getElementById('audit-name').value) {
+                    showMessage('يرجى إدخال اسم التقييم', 'error');
+                    return;
+                }
+                
+                if (!document.getElementById('area-name').value) {
+                    showMessage('يرجى إدخال اسم المنطقة', 'error');
+                    return;
+                }
+                
+                goToStep(3);
+            });
+            
+            // الخطوة 3
+            document.getElementById('prev-step3').addEventListener('click', function() {
+                goToStep(2);
+            });
+            
+            document.getElementById('next-step3').addEventListener('click', function() {
+                // التحقق من اكتمال جميع التقييمات
+                let allEvaluated = true;
+                let evaluatedCount = 0;
+                let totalQuestions = 0;
+                
+                auditData.evaluations.forEach((evaluation, unitIndex) => {
+                    Object.keys(evaluation.categories).forEach(category => {
+                        totalQuestions += evaluation.categories[category].answers.length;
+                        evaluation.categories[category].answers.forEach(answer => {
+                            if (answer !== null) evaluatedCount++;
+                        });
+                    });
+                });
+                
+                const completionRate = (evaluatedCount / totalQuestions) * 100;
+                
+                if (completionRate < 100) {
+                    const t = translations[currentLanguage];
+                    const message = `${t.incompleteEvaluation}\n\nتم إكمال ${Math.round(completionRate)}% من التقييم.`;
+                    
+                    if (!confirm(message)) {
+                        return;
+                    }
+                }
+                
+                goToStep(4);
+            });
+            
+            // الخطوة 4
+            document.getElementById('prev-step4').addEventListener('click', function() {
+                goToStep(3);
+            });
+            
+            document.getElementById('new-audit').addEventListener('click', function() {
+                if (isDataChanged && !auditData.isSaved) {
+                    const t = translations[currentLanguage];
+                    if (confirm(t.dataChanged)) {
+                        saveAudit();
+                    }
+                }
+                resetAuditData();
+            });
+            
+            // زر الحفظ
+            document.getElementById('save-audit-btn').addEventListener('click', saveAudit);
+            
+            // القائمة الجانبية
+            document.getElementById('toggle-saved-audits').addEventListener('click', function() {
+                document.querySelector('.saved-audits-sidebar').classList.toggle('open');
+            });
+            
+            document.getElementById('close-sidebar').addEventListener('click', function() {
+                document.querySelector('.saved-audits-sidebar').classList.remove('open');
+            });
+            
+            document.getElementById('manage-data-btn').addEventListener('click', function() {
+                document.querySelector('.saved-audits-sidebar').classList.remove('open');
+                document.getElementById('data-modal').classList.add('active');
+                document.getElementById('export-option').click();
+                document.getElementById('json-data').value = JSON.stringify(savedAudits, null, 2);
+            });
+            
+            document.getElementById('clear-data-btn').addEventListener('click', clearAllAudits);
+            
+            // أزرار الطباعة والتصدير
+            document.getElementById('print-btn').addEventListener('click', printReport);
+            
+            document.getElementById('export-btn').addEventListener('click', function() {
+                if (savedAudits.length > 0) {
+                    document.getElementById('data-modal').classList.add('active');
+                    document.getElementById('export-option').click();
+                    document.getElementById('json-data').value = JSON.stringify(savedAudits, null, 2);
+                } else {
+                    showMessage('لا توجد بيانات للتصدير.', 'error');
+                }
+            });
+            
+            document.getElementById('import-btn').addEventListener('click', function() {
+                document.getElementById('data-modal').classList.add('active');
+                document.getElementById('import-option').click();
+            });
+            
+            document.getElementById('close-data-modal').addEventListener('click', function() {
+                document.getElementById('data-modal').classList.remove('active');
+            });
+            
+            // إدارة نافذة البيانات
+            document.querySelectorAll('.data-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.data-option').forEach(o => o.classList.remove('active'));
+                    document.querySelectorAll('.data-section').forEach(s => s.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    const targetId = this.id.replace('-option', '-section');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+            
+            // نسخ JSON
+            document.getElementById('copy-json').addEventListener('click', function() {
+                const jsonText = document.getElementById('json-data').value;
+                navigator.clipboard.writeText(jsonText).then(() => {
+                    showMessage(translations[currentLanguage].copied, 'success');
+                });
+            });
+            
+            // تحميل JSON
+            document.getElementById('download-json').addEventListener('click', exportData);
+            
+            // اختيار ملف للاستيراد
+            document.getElementById('json-file').addEventListener('change', function() {
+                const fileName = this.files[0]?.name || 'لم يتم اختيار ملف';
+                document.getElementById('file-name').textContent = fileName;
+                document.getElementById('import-json').disabled = !this.files[0];
+            });
+            
+            // استيراد JSON
+            document.getElementById('import-json').addEventListener('click', importData);
+            
+            // نافذة الطباعة
+            document.getElementById('close-print-modal').addEventListener('click', function() {
+                document.getElementById('print-modal').classList.remove('active');
+            });
+            
+            document.getElementById('cancel-print').addEventListener('click', function() {
+                document.getElementById('print-modal').classList.remove('active');
+            });
+            
+            document.getElementById('do-print').addEventListener('click', function() {
+                window.print();
+                document.getElementById('print-modal').classList.remove('active');
+            });
+            
+            // نافذة التأكيد
+            document.getElementById('close-confirm-modal').addEventListener('click', function() {
+                document.getElementById('confirm-modal').classList.remove('active');
+            });
+            
+            document.getElementById('cancel-delete').addEventListener('click', function() {
+                document.getElementById('confirm-modal').classList.remove('active');
+            });
+            
+            document.getElementById('confirm-delete').addEventListener('click', confirmClearAllAudits);
+            
+            // إغلاق النوافذ عند النقر خارجها
+            window.addEventListener('click', function(event) {
+                const sidebar = document.querySelector('.saved-audits-sidebar');
+                const sidebarToggle = document.getElementById('toggle-saved-audits');
+                
+                if (sidebar.classList.contains('open') && 
+                    !sidebar.contains(event.target) && 
+                    !sidebarToggle.contains(event.target)) {
+                    sidebar.classList.remove('open');
+                }
+                
+                const printModal = document.getElementById('print-modal');
+                if (printModal.classList.contains('active') && 
+                    event.target === printModal) {
+                    printModal.classList.remove('active');
+                }
+                
+                const dataModal = document.getElementById('data-modal');
+                if (dataModal.classList.contains('active') && 
+                    event.target === dataModal) {
+                    dataModal.classList.remove('active');
+                }
+                
+                const confirmModal = document.getElementById('confirm-modal');
+                if (confirmModal.classList.contains('active') && 
+                    event.target === confirmModal) {
+                    confirmModal.classList.remove('active');
+                }
+            });
+            
+            // حفظ تلقائي عند الخروج من الصفحة
+            window.addEventListener('beforeunload', function(e) {
+                if (isDataChanged && !auditData.isSaved) {
+                    const message = 'يوجد تغييرات غير محفوظة. هل تريد ترك الصفحة دون الحفظ؟';
+                    e.returnValue = message;
+                    return message;
+                }
+            });
+            
+            // التحذير عند محاولة تحديث الصفحة
+            window.addEventListener('beforeunload', function() {
+                if (isDataChanged && !auditData.isSaved) {
+                    const t = translations[currentLanguage];
+                    return t.dataChanged;
+                }
+            });
+            
+            console.log('Event listeners setup completed');
+        }
+
+        // ==================== بدء التطبيق ====================
+        console.log('5S Audit Tool - Single File Version');
+        console.log('All features included:');
+        console.log('1. Complete 5S audit system');
+        console.log('2. Bilingual support (Arabic/English)');
+        console.log('3. Local storage with save button');
+        console.log('4. Previous audits sidebar');
+        console.log('5. Print functionality with recommendations');
+        console.log('6. Data export/import');
+        console.log('7. Charts and analytics');
+        console.log('8. Responsive design');
+    </script>
+</body>
+</html>
